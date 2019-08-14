@@ -1,33 +1,96 @@
 let ctx = document.getElementById('canvas').getContext('2d')
-let fpsCount = 0
 
-
+window.addEventListener('keydown', keyDown, false)
+window.addEventListener('keyup', keyUp, false)
 
 let game = {
     width: ctx.canvas.width,
     height: ctx.canvas.height,
+    movement: {
+        q: 0,
+        a: 0,
+        w: 0,
+        s: 0
+    },
+    direction: 'still'
 }
 
-let scream = new Image()
-scream.src = 'scream.jpg'
-// scream.id = 'scream'
+//let scream = new Image()
+//scream.src = 'scream.jpg'
 
-// let scream = document.getElementById('scream')
-// scream.onload = () => {ctx.drawImage(scream, 10, 10)}
-
-// titleText('Hello World!')
-
-
-// ctx.drawImage(scream, 10, 10)
-
-window.requestAnimationFrame(mainLoop)
-
-function fps() {
-    fpsCount += 1
-    if (fpsCount < 2) {
-        setTimeout(() => {fpsCount = 0}, 1000)
+function keyDown(keyPress) {
+    let key = keyPress.key.toLowerCase()
+    let keyMap = {
+        q: 1,
+        a: 2,
+        w: 4,
+        s: 8
     }
-    return fpsCount
+    switch (key) {
+        case 'q':
+        case 'a':
+        case 'w':
+        case 's':
+            game.movement[key] = keyMap[key]
+        default:
+            direction()
+            break
+    }
+    // direction()
+}
+
+function keyUp(keyPress) {
+    let key = keyPress.key.toLowerCase()
+    switch (key) {
+        case 'q':
+        case 'a':
+        case 'w':
+        case 's':
+            game.movement[key] = 0
+        default:
+            direction()
+            break
+    }
+    // direction()
+}
+
+function direction() {
+    let movementNo = game.movement.q + game.movement.a + game.movement.w + game.movement.s
+    switch (movementNo) {
+        case 0:
+        case 3:
+        case 12:
+        case 15:
+            game.direction = 'still'
+            break
+        case 1:
+        case 8:
+        case 11:
+        case 13:
+            game.direction = 'slow right'
+            break
+        case 2:
+        case 4:
+        case 7:
+        case 14:
+            game.direction = 'slow left'
+            break
+        case 5:
+            game.direction = 'forward'
+            break
+        case 6:
+            game.direction = 'fast left'
+            break
+        case 9:
+            game.direction = 'fast right'
+            break
+        case 10:
+            game.direction = 'reverse'
+            break
+        default:
+            game.direction = 'still'
+            break
+    }
 }
 
 function titleText(txt, options) {
@@ -61,9 +124,14 @@ function titleText(txt, options) {
 
 function mainLoop() {
     ctx.clearRect(0, 0, game.width, game.height);
-    ctx.drawImage(scream,10,10)
-    titleText('Hello World!')
+    // ctx.drawImage(scream,10,10)
+    // direction()
+    titleText(game.direction)
+
+    // titleText('Hello World!')
     // ctx.translate(1, 0)
 
     window.requestAnimationFrame(mainLoop);
 }
+
+window.requestAnimationFrame(mainLoop)
