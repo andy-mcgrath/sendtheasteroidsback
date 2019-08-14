@@ -1,7 +1,6 @@
 let ctx = document.getElementById('canvas').getContext('2d')
 
-window.addEventListener('keydown', keyDown, false)
-window.addEventListener('keyup', keyUp, false)
+
 
 let game = {
     width: ctx.canvas.width,
@@ -12,11 +11,82 @@ let game = {
         w: 0,
         s: 0
     },
-    direction: 'still'
+    // direction: 'still',
+    keyDown: function(keyPress) {
+        let key = keyPress.key.toLowerCase()
+        let keyMap = {
+            q: 1,
+            a: 2,
+            w: 4,
+            s: 8
+        }
+        switch (key) {
+            case 'q':
+            case 'a':
+            case 'w':
+            case 's':
+                game.movement[key] = keyMap[key]
+                break
+            default:
+                break
+        }
+    },
+    keyUp: function(keyPress) {
+        let key = keyPress.key.toLowerCase()
+        switch (key) {
+            case 'q':
+            case 'a':
+            case 'w':
+            case 's':
+                    game.movement[key] = 0
+                break
+            default:
+                break
+        }
+    },
+    direction: function() {
+        let movementNo = this.movement.q + this.movement.a + this.movement.w + this.movement.s
+        switch (movementNo) {
+            case 0:
+            case 3:
+            case 12:
+            case 15:
+                return 'still'
+                break
+            case 1:
+            case 8:
+            case 11:
+            case 13:
+                return 'slow right'
+                break
+            case 2:
+            case 4:
+            case 7:
+            case 14:
+                return 'slow left'
+                break
+            case 5:
+                return 'forward'
+                break
+            case 6:
+                return 'fast left'
+                break
+            case 9:
+                return 'fast right'
+                break
+            case 10:
+                return 'reverse'
+                break
+            default:
+                return 'still'
+                break
+        }
+    },
+    init: function() {
+        window.addEventListener('keydown', game.keyDown, false)
+        window.addEventListener('keyup', game.keyUp, false)
+    }
 }
-
-//let scream = new Image()
-//scream.src = 'scream.jpg'
 
 function keyDown(keyPress) {
     let key = keyPress.key.toLowerCase()
@@ -36,7 +106,6 @@ function keyDown(keyPress) {
             direction()
             break
     }
-    // direction()
 }
 
 function keyUp(keyPress) {
@@ -51,7 +120,6 @@ function keyUp(keyPress) {
             direction()
             break
     }
-    // direction()
 }
 
 function direction() {
@@ -64,7 +132,7 @@ function direction() {
             game.direction = 'still'
             break
         case 1:
-        case 8:
+        case 8:width
         case 11:
         case 13:
             game.direction = 'slow right'
@@ -103,7 +171,7 @@ function titleText(txt, options) {
     }
     options = options || {}
     x = options.x || game.width/2
-    y = options.y || game.width/2
+    y = options.y || game.height/2
     ctx.font = options.font || '900 50px Arial'
     ctx.textAlign = options.align || 'center'
     ctx.textBaseline = options.baseline || 'middle'
@@ -126,7 +194,7 @@ function mainLoop() {
     ctx.clearRect(0, 0, game.width, game.height);
     // ctx.drawImage(scream,10,10)
     // direction()
-    titleText(game.direction)
+    titleText(game.direction())
 
     // titleText('Hello World!')
     // ctx.translate(1, 0)
@@ -134,4 +202,7 @@ function mainLoop() {
     window.requestAnimationFrame(mainLoop);
 }
 
+game.init()
+// window.addEventListener('keydown', game.keyDown, false)
+// window.addEventListener('keyup', game.keyUp, false)
 window.requestAnimationFrame(mainLoop)
