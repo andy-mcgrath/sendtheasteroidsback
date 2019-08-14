@@ -1,4 +1,7 @@
 let ctx = document.getElementById('canvas').getContext('2d')
+let fpsCount = 0
+
+
 
 let game = {
     width: ctx.canvas.width,
@@ -10,14 +13,25 @@ scream.src = 'scream.jpg'
 // scream.id = 'scream'
 
 // let scream = document.getElementById('scream')
-scream.onload = () => {ctx.drawImage(scream, 10, 10)}
+// scream.onload = () => {ctx.drawImage(scream, 10, 10)}
 
-titleText('Hello World!')
+// titleText('Hello World!')
 
 
 // ctx.drawImage(scream, 10, 10)
 
+window.requestAnimationFrame(mainLoop)
+
+function fps() {
+    fpsCount += 1
+    if (fpsCount < 2) {
+        setTimeout(() => {fpsCount = 0}, 1000)
+    }
+    return fpsCount
+}
+
 function titleText(txt, options) {
+    ctx.save()
     let shadowTemps = {
         color: ctx.shadowColor,
         blur: ctx.shadowBlur,
@@ -43,4 +57,13 @@ function titleText(txt, options) {
     ctx.shadowOffsetX = shadowTemps.offsetX
     ctx.shadowOffsetY = shadowTemps.offsetY
     ctx.strokeText(txt, x, y)
+}
+
+function mainLoop() {
+    ctx.clearRect(0, 0, game.width, game.height);
+    ctx.drawImage(scream,10,10)
+    titleText('Hello World!')
+    // ctx.translate(1, 0)
+
+    window.requestAnimationFrame(mainLoop);
 }
