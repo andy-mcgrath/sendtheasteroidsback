@@ -1,8 +1,20 @@
-let ctx = document.getElementById('canvas').getContext('2d')
+const ctx = document.getElementById('canvas').getContext('2d')
+ctx.canvas.style = 'border:1px solid #000000;cursor: none;'
+ctx.canvas.height = 900
+ctx.canvas.width = 900
+const rect = ctx.canvas.getBoundingClientRect()
 
 let game = {
     width: ctx.canvas.width,
     height: ctx.canvas.height,
+    mouse: {
+        x: 0,
+        y: 0
+    },
+    target: {
+        x: 0,
+        y: 0
+    },
     movement: {
         q: 0,
         a: 0,
@@ -56,9 +68,14 @@ let game = {
                 return 'still'
         }
     },
+    mouseMove: function(mouseRef) {
+        game.mouse.x = mouseRef.clientX - rect.left
+        game.mouse.y = mouseRef.clientY - rect.top
+    },
     init: function() {
-        window.addEventListener('keydown', game.keyDown, false)
-        window.addEventListener('keyup', game.keyUp, false)
+        document.addEventListener('keydown', game.keyDown, false)
+        document.addEventListener('keyup', game.keyUp, false)
+        document.addEventListener("mousemove", game.mouseMove, false);
     }
 }
 
@@ -90,10 +107,16 @@ function titleText(txt, options) {
     ctx.shadowOffsetY = shadowTemps.offsetY
     ctx.strokeText(txt, x, y)
 }
+function drawMouse(mouse) {
+    ctx.font = '30px Arial'
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillText('+', mouse.x, mouse.y)
+}
 
 function mainLoop() {
     ctx.clearRect(0, 0, game.width, game.height);
     titleText(game.direction())
+    drawMouse(game.mouse)
     window.requestAnimationFrame(mainLoop);
 }
 
