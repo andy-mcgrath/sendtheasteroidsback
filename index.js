@@ -1,7 +1,7 @@
 const ctx = document.getElementById('canvas').getContext('2d')
-ctx.canvas.style = 'border:1px solid #000000;cursor: none;'
-ctx.canvas.height = 900
-ctx.canvas.width = 900
+ctx.canvas.style = 'border:1px solid #000000;cursor: none;padding: 0;margin: auto;display: block;'
+ctx.canvas.height = 800
+ctx.canvas.width = 800
 const rect = ctx.canvas.getBoundingClientRect()
 
 let game = {
@@ -71,6 +71,16 @@ let game = {
     mouseMove: function(mouseRef) {
         game.mouse.x = mouseRef.clientX - rect.left
         game.mouse.y = mouseRef.clientY - rect.top
+        if (game.mouse.x < 0) {
+            game.mouse.x = 0
+        } else if (game.mouse.x > game.width) {
+            game.mouse.x = game.width
+        }
+        if (game.mouse.y < 0) {
+            game.mouse.y = 0
+        } else if (game.mouse.y > game.height) {
+            game.mouse.y = game.height
+        }
     },
     init: function() {
         document.addEventListener('keydown', game.keyDown, false)
@@ -115,8 +125,8 @@ function drawMouse(mouse) {
 
 function mainLoop() {
     ctx.clearRect(0, 0, game.width, game.height);
-    titleText(game.direction())
     drawMouse(game.mouse)
+    titleText(game.direction())
     window.requestAnimationFrame(mainLoop);
 }
 
