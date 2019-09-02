@@ -1,5 +1,5 @@
 const ctx = document.getElementById('canvas').getContext('2d')
-ctx.canvas.style = 'border:1px solid #000000;cursor: none;padding: 0;margin: auto;display: block;'
+ctx.canvas.style = 'border:1px solid white; cursor: none; padding: 0; margin: auto; display: block; background: black'
 ctx.canvas.height = 800
 ctx.canvas.width = 800
 const rect = ctx.canvas.getBoundingClientRect()
@@ -38,6 +38,9 @@ let game = {
         if (key in game.keyMap){
             game.movement[key] = 0
         }
+    },
+    mouseDown: function() {
+        
     },
     direction: function() {
         switch (this.movement.q + this.movement.a + this.movement.w + this.movement.s) {
@@ -119,7 +122,7 @@ function titleText(txt, options) {
 }
 function drawMouse(mouse) {
     ctx.font = '30px Arial'
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
     ctx.fillText('+', mouse.x, mouse.y)
 }
 
