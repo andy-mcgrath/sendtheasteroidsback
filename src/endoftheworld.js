@@ -26,90 +26,40 @@ let playerSprite
 let asteroidArray = []
 let plasmaArray = []
 let spriteArray = []
-
-for (let i = 0; i < 4; i++) {
-    setTimeout(() => createAsteroid(), Math.random() * 3000)
-}
-
-function random(number) {
-    return Math.round(Math.random() * number)
-}
-
-function createAsteroid() {
-    let asteroid = Sprite({
-        type: 'asteroid',
-        alive: true,
-        hit: false,
-        x: random(gameSetting.canvasWidth),
-        y: random(-30),
-        anchor: {x: 0.5, y: 0.5},
-        dx: (Math.random() * 3) - 1.5,
-        dy: Math.random(),
-        ddy: 0.005,
-        radius: random(20) + 10,
-        height: this.radius,
-        width: this.radius,
-        update() {
-            this.advance()
-            if ((this.x - this.radius - 1 < 0) || (this.x + this.radius + 1 > gameSetting.canvasWidth)) {
-                this.alive = false
-                if (this.hit) {
-                    gameSetting.playerScore += Math.round(this.radius * 100)
-                }
-                setTimeout(() => createAsteroid(), Math.random() * 3000)
-            }
-            if (this.collidesWith(playerSprite)) {
-                playerSprite.alive = false
-            }
-            if (this.y + this.radius >= gameSetting.canvasHeight) {
-                playerSprite.alive = false
-            }
-        },
-        render() {
-          this.context.strokeStyle = 'white';
-          this.context.beginPath();  // start drawing a shape
-          this.context.arc(this.x, this.y, this.radius, 0, Math.PI*2);
-          this.context.stroke();     // outline the circle
-        }
-    })
-    asteroidArray.push(asteroid)
-}
-
+let asteroid01 = document.getElementById('asteroid01')
 let plasma01 = document.getElementById('plasma01')
-function createPlasma(x, y, size) {
-    let plasma = Sprite({
-        type: 'plasma',
-        alive: true,
-        x: x,
-        y: y,
-        anchor: {x: 0.5, y: 0.5},
-        width: size,
-        height: size,
-        radius: size / 2,
-        image: plasma01,
-        ttl: gameSetting.plasmaTtl,
-        update() {
-            this.ttl -= 1
-            if (this.ttl < 1) {
-                this.alive = false
-            }
-            asteroidArray.map((asteroid) => {collide(asteroid, this)})
-            // for (asteroid of asteroidArray) {
-                // if (this.collidesWith(asteroid)) {
-                //     gameSetting.playerScore += 10
-                //     this.alive = false
-                //     if (asteroid.dx > 0) asteroid.dx += asteroid.dy
-                //     if (asteroid.dx < 0) asteroid.dx -= asteroid.dy
-                //     asteroid.dy *= -0.5
-                //     asteroid.hit = true
-                // }
-            // }
+let playerImg = document.getElementById('playerImg')
+let loop = GameLoop({
+    update() {
+        asteroidArray.map((sprite) => {sprite.update()})
+        asteroidArray = asteroidArray.filter(sprite => sprite.alive)
+        plasmaArray.map((sprite) => {sprite.update()})
+        plasmaArray = plasmaArray.filter(sprite => sprite.alive)
+        spriteArray.map((sprite) => {sprite.update()})
+        // spriteArray = spriteArray.filter((sprite) => {sprite.isAlive()})
+        if (!playerSprite.alive) {
+            loop.stop()
         }
-    })
-    plasmaArray.push(plasma)
+    },
+    render() {
+        asteroidArray.map((sprite) => {
+            sprite.render()
+        })
+        plasmaArray.map((sprite) => {
+            sprite.render()
+        })
+        spriteArray.map((sprite) => {
+            sprite.render()
+        })
+    }
+})
+
+asteroid01.onload = function() {
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => createAsteroid(), Math.random() * 5000)
+    }
 }
 
-let playerImg = document.getElementById('playerImg')
 playerImg.onload = function() {
     playerSprite = Sprite({
         type: 'player',
@@ -180,6 +130,89 @@ playerImg.onload = function() {
 
     spriteArray.push(playerSprite)
     createHud()
+    loop.start()
+}
+
+function random(number) {
+    return Math.round(Math.random() * number)
+}
+
+function createAsteroid() {
+    let size = random(20) + 10
+    let asteroid = Sprite({
+        type: 'asteroid',
+        alive: true,
+        hit: false,
+        x: random(gameSetting.canvasWidth),
+        y: random(-30),
+        anchor: {x: 0.5, y: 0.5},
+        dx: (Math.random() * 3) - 1.5,
+        dy: Math.random(),
+        ddy: 0.005,
+        radius: size,
+        height: size,
+        width: size,
+        rotation: Math.random() * (Math.PI * 2),
+        rotationSpeed: Math.random() - 0.5,
+        image: asteroid01,
+        update() {
+            this.rotation += this.rotationSpeed
+            this.advance()
+            if ((this.x + this.radius < 0) || (this.x - this.radius > gameSetting.canvasWidth)) {
+                this.alive = false
+                if (this.hit) {
+                    gameSetting.playerScore += Math.round(this.radius * 100)
+                }
+                setTimeout(() => createAsteroid(), Math.random() * 5000)
+            }
+            if (this.collidesWith(playerSprite)) {
+                playerSprite.alive = false
+            }
+            if (this.y + this.radius > gameSetting.canvasHeight) {
+                playerSprite.alive = false
+            }
+        },
+        // render() {
+        //   this.context.strokeStyle = 'white';
+        //   this.context.beginPath();  // start drawing a shape
+        //   this.context.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+        //   this.context.stroke();     // outline the circle
+        // }
+    })
+    asteroidArray.push(asteroid)
+}
+
+function createPlasma(x, y, size) {
+    let plasma = Sprite({
+        type: 'plasma',
+        alive: true,
+        x: x,
+        y: y,
+        anchor: {x: 0.5, y: 0.5},
+        width: size,
+        height: size,
+        radius: size / 2,
+        image: plasma01,
+        ttl: gameSetting.plasmaTtl,
+        update() {
+            this.ttl -= 1
+            if (this.ttl < 1) {
+                this.alive = false
+            }
+            asteroidArray.map((asteroid) => {collide(asteroid, this)})
+            // for (asteroid of asteroidArray) {
+                // if (this.collidesWith(asteroid)) {
+                //     gameSetting.playerScore += 10
+                //     this.alive = false
+                //     if (asteroid.dx > 0) asteroid.dx += asteroid.dy
+                //     if (asteroid.dx < 0) asteroid.dx -= asteroid.dy
+                //     asteroid.dy *= -0.5
+                //     asteroid.hit = true
+                // }
+            // }
+        }
+    })
+    plasmaArray.push(plasma)
 }
 
 function createHud() {
@@ -239,30 +272,3 @@ function collide(asteroid, plasma) {
         asteroid.hit = true
     }
 }
-
-let loop = GameLoop({
-    update() {
-        asteroidArray.map((sprite) => {sprite.update()})
-        asteroidArray = asteroidArray.filter(sprite => sprite.alive)
-        plasmaArray.map((sprite) => {sprite.update()})
-        plasmaArray = plasmaArray.filter(sprite => sprite.alive)
-        spriteArray.map((sprite) => {sprite.update()})
-        // spriteArray = spriteArray.filter((sprite) => {sprite.isAlive()})
-        if (!playerSprite.alive) {
-            loop.stop()
-        }
-    },
-    render() {
-        asteroidArray.map((sprite) => {
-            sprite.render()
-        })
-        plasmaArray.map((sprite) => {
-            sprite.render()
-        })
-        spriteArray.map((sprite) => {
-            sprite.render()
-        })
-    }
-})
-
-loop.start()
