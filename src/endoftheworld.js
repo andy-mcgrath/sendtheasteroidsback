@@ -10,9 +10,9 @@ let {
 let gameSetting = {
     playerScore: 0,
     maxPlasma: 150,
-    plasmaBurnRate: 1,
+    plasmaBurnRate: 2,
     plasmaRefillRate: 0.5,
-    playerFireRate: 0.1,
+    playerFireRate: 0,
     plasmaTtl: 120,
     canvasHeight: 800,
     canvasWidth: 800
@@ -114,16 +114,19 @@ playerImg.onload = function() {
                 
             }
             if (!keyPressed('space') && this.plasma < gameSetting.maxPlasma) {
-                // this.plasma += gameSetting.plasmaRefillRate
-                setTimeout(
-                    () => {
-                        playerSprite.plasma += gameSetting.plasmaRefillRate
-                        if (playerSprite.plasma > gameSetting.maxPlasma) {
-                            playerSprite.plasma = gameSetting.maxPlasma
-                        }
-                    },
-                    Math.random() * 1000
-                )
+                this.plasma += gameSetting.plasmaRefillRate
+                if (playerSprite.plasma > gameSetting.maxPlasma) {
+                    playerSprite.plasma = gameSetting.maxPlasma
+                }
+                // setTimeout(
+                //     () => {
+                //         playerSprite.plasma += gameSetting.plasmaRefillRate
+                //         if (playerSprite.plasma > gameSetting.maxPlasma) {
+                //             playerSprite.plasma = gameSetting.maxPlasma
+                //         }
+                //     },
+                //     1000
+                // )
             }
         }
     })
@@ -149,7 +152,7 @@ function createAsteroid() {
         dx: (Math.random() * 3) - 1.5,
         dy: Math.random(),
         ddy: 0.005,
-        radius: size,
+        radius: size / 2,
         height: size,
         width: size,
         rotation: Math.random() * (Math.PI * 2),
@@ -266,9 +269,16 @@ function collide(asteroid, plasma) {
     if (Math.sqrt(dx * dx + dy * dy) < asteroid.radius + plasma.radius) {
         gameSetting.playerScore += 10
         plasma.alive = false
-        if (asteroid.dx > 0) asteroid.dx += asteroid.dy
-        if (asteroid.dx < 0) asteroid.dx -= asteroid.dy
-        asteroid.dy *= -0.5
+        if (asteroid.x > plasma.x) {
+            asteroid.dx *= 2
+        } else {
+            asteroid.dx *= -1
+        }
+        if (asteroid.y > plasma.y) {
+            asteroid.dy *= 2
+        } else {
+            asteroid.dy *= -1
+        }
         asteroid.hit = true
     }
 }
