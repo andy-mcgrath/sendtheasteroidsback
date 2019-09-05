@@ -5,7 +5,7 @@ let {
     keyPressed,
     load,
     getStoreItem,
-    setStoreItem, 
+    setStoreItem,
     GameLoop,
     Pool,
     Sprite
@@ -146,7 +146,7 @@ function createPlayer() {
                 createPlasma(this.x, this.y - (this.radius * 2), (this.radius * 2))
                 this.plasma -= gameSetting.plasmaBurnRate
                 this.dt = 0
-                
+
             }
             if (!keyPressed('space') && this.plasma < gameSetting.maxPlasma) {
                 this.plasma += gameSetting.plasmaRefillRate
