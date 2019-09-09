@@ -70,6 +70,17 @@ function createAsteroids(number) {
 }
 
 function createPlayer() {
+    playerSheet = SpriteSheet({
+        image: imageAssets['img/astronaught'],
+        frameHeight: 16,
+        frameWidth: 16,
+        animations: {
+            default: {
+                frames: '0..2',
+                frameRate: 6
+            }
+        }
+    })
     playerSprite = Sprite({
         type: 'player',
         alive: true,
@@ -79,11 +90,11 @@ function createPlayer() {
         dx: 0,
         dy: 0,
         dt: 0,
-        width: 24,
+        width: 32,
         height: 32,
         radius: 16,
         plasma: gameSetting.maxPlasma,
-        image: imageAssets['img/astronaught01'],
+        animations: playerSheet.animations,
         update() {
             if (keyPressed('left')) {
                 if (this.dx > 0) {
@@ -224,7 +235,6 @@ function createPlasma(x, y, size) {
         width: size,
         height: size,
         radius: size / 2,
-        // image: imageAssets['img/plasma01'],
         animations: plasmaSheet.animations,
         ttl: gameSetting.plasmaTtl,
         new: 50,
@@ -332,8 +342,7 @@ function collide(asteroid, plasma) {
 }
 
 load(
-    'img/astronaught01.png',
-    'img/plasma01.png',
+    'img/astronaught.png',
     'img/Plasma02.png',
     'img/asteroid01.png'
 ).then(() => {
