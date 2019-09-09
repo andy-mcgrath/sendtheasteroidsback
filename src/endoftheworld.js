@@ -8,17 +8,18 @@ let {
     setStoreItem,
     GameLoop,
     Pool,
-    Sprite
+    Sprite,
+    SpriteSheet
 } = kontra;
 
 let gameSetting = {
     playerAcc: 0.1,
     playerScore: 0,
     maxPlasma: 150,
-    plasmaBurnRate: 2,
-    plasmaRefillRate: 0.5,
-    playerFireRate: 0,
-    plasmaTtl: 160,
+    plasmaBurnRate: 10,
+    plasmaRefillRate: 1,
+    playerFireRate: 0.1,
+    plasmaTtl: 140,
     canvasHeight: 800,
     canvasWidth: 800,
     highScore: getStoreItem('highScore') || 0
@@ -32,7 +33,6 @@ let playerSprite
 let asteroidArray = []
 let plasmaArray = []
 let spriteArray = []
-
 
 let loop = GameLoop({
     update() {
@@ -202,22 +202,41 @@ function createAsteroid() {
 }
 
 function createPlasma(x, y, size) {
+    let plasmaSheet = SpriteSheet({
+        image: imageAssets['img/Plasma02'],
+        frameHeight: 11,
+        frameWidth: 11,
+        animations: {
+            default: {
+                frames: [0,1],
+                frameRate: 6
+            }
+        }
+
+    })
     let plasma = Sprite({
         type: 'plasma',
         alive: true,
         x: x,
         y: y,
+        dy: -1,
         anchor: {x: 0.5, y: 0.5},
         width: size,
         height: size,
         radius: size / 2,
-        image: imageAssets['img/plasma01'],
+        // image: imageAssets['img/plasma01'],
+        animations: plasmaSheet.animations,
         ttl: gameSetting.plasmaTtl,
+        new: 50,
+        alpha: 0.5,
         update() {
             this.ttl -= 1
             if (this.ttl < 1) {
                 this.alive = false
+            } else if (this.ttl < (gameSetting.plasmaTtl - 50) && this.dy != 0) {
+                this.dy = 0
             }
+            this.advance()
             asteroidArray.map((asteroid) => {collide(asteroid, this)})
         }
     })
@@ -262,11 +281,34 @@ function createHud() {
         render() {
             this.context.fillStyle = this.color;
             this.context.font = '15px Arial'
-            this.context.fillText(`SCORE: ${gameSetting.playerScore}\tHIGH SCORE: ${gameSetting.highScore}`, this.x, this.y)
+            this.context.fillText(`SCORE: ${gameSetting.playerScore}`, this.x, this.y)
         }
 
     })
     spriteArray.push(playerScore)
+
+    let highScore = Sprite({
+        x: gameSetting.canvasWidth - 250,
+        y: gameSetting.canvasHeight - 10,
+        color: 'white',
+        width: this.plasma,
+        render() {
+            this.context.fillStyle = this.color;
+            this.context.font = '15px Arial'
+            this.context.fillText(`HIGH SCORE: ${gameSetting.highScore}`, this.x, this.y)
+        }
+
+    })
+    spriteArray.push(highScore)
+}
+
+function getDirection(sprite) {
+    let direction = 0
+    if (sprite.dy < 0) direction += 1
+    if (sprite.dy > 0) direction += 2
+    if (sprite.dx < 0) direction += 4
+    if (sprite.dx > 0) direction += 8
+    return direction
 }
 
 function collide(asteroid, plasma) {
@@ -275,15 +317,15 @@ function collide(asteroid, plasma) {
     if (Math.sqrt(dx * dx + dy * dy) < asteroid.radius + plasma.radius) {
         gameSetting.playerScore += 10
         plasma.alive = false
-        if (asteroid.x > plasma.x) {
-            asteroid.dx *= 2
+        if (asteroid.x > plasma.x && asteroid.dx < 0) {
+            if (asteroid.dx < 0) asteroid.dx *= -1
         } else {
-            asteroid.dx *= -1
+            if (asteroid.dx > 0) asteroid.dx *= -1
         }
         if (asteroid.y > plasma.y) {
-            asteroid.dy *= 2
+            if (asteroid.dy < 0) asteroid.dy *= -1
         } else {
-            asteroid.dy *= -1
+            if (asteroid.dy > 0) asteroid.dy *= -1
         }
         asteroid.hit = true
     }
@@ -292,6 +334,7 @@ function collide(asteroid, plasma) {
 load(
     'img/astronaught01.png',
     'img/plasma01.png',
+    'img/Plasma02.png',
     'img/asteroid01.png'
 ).then(() => {
     createPlayer()
