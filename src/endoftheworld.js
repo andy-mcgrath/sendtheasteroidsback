@@ -51,7 +51,8 @@ let loop = GameLoop({
         spriteArray.map((sprite) => {sprite.update()})
         playerSprite.update()
         if (!playerSprite.alive) {
-            loop.stop()
+            lostGame()
+            // loop.stop()
             if (gameSetting.playerScore > gameSetting.highScore) {
                 setStoreItem('highScore', gameSetting.playerScore)
             }
@@ -87,27 +88,45 @@ function startLevel() {
             loop.start()
             break
         case 2:
+            gameSetting.plasmaBurnRate += 1
             createAsteroids(7, 9000)
             break
         case 3:
+            gameSetting.plasmaBurnRate += 2
             createAsteroids(9, 8000)
             break
         case 4:
+            gameSetting.plasmaBurnRate += 3
             createAsteroids(11, 7000)
             break
         case 5:
+            gameSetting.plasmaBurnRate += 4
             createAsteroids(13, 5000)
             break
         case 6:
+            gameSetting.plasmaBurnRate += 5
             createAsteroids(15, 4000)
             break
         case 7:
+            gameSetting.plasmaBurnRate += 6
             createAsteroids(17, 3000)
             break
         case 8:
+            gameSetting.plasmaBurnRate += 7
             createAsteroids(19, 2000)
             break
         default:
+            plasmaArray = []
+            spriteArray = []
+            bgStars.get({
+                x: 300,
+                y: 400,
+                render() {
+                    this.context.fillStyle = 'rgba(255, 255, 255, 1.0)'
+                    this.context.font = '50px Monospace'
+                    this.context.fillText(`YOU SAVED THE EARTH`, this.x, this.y)
+                }
+            })
             loop.stop()
     }
     createLevelTitle()
@@ -136,7 +155,7 @@ function createPlayer() {
         type: 'player',
         alive: true,
         x: gameSetting.canvasWidth / 2,
-        y: gameSetting.canvasHeight / 2,
+        y: gameSetting.canvasHeight * 0.6,
         anchor: {x: 0.5, y: 0.5},
         dx: 0,
         dy: 0,
@@ -289,7 +308,6 @@ function createPlasma(x, y, size) {
         ttl: gameSetting.plasmaTtl,
         alpha: 1,
         update() {
-            // this.context.imageSmoothingEnabled = true
             if (this.ttl < 1) {
                 this.alive = false
             } else if (this.ttl < (gameSetting.plasmaTtl - 50) && this.dy != 0) {
@@ -305,10 +323,10 @@ function createPlasma(x, y, size) {
 
 function createBg() {
     for (let i = 0; i < 100; i++) {
-        let size = Math.round(Math.random() * 2) + 1
+        let size = random(2) + 1
         bgStars.get({
-            x: Math.round(Math.random() * 800),
-            y: Math.round(Math.random() * 800),
+            x: random(gameSetting.canvasWidth),
+            y: random(gameSetting.canvasHeight),
             color: `rgba(255, 255, 255, ${Math.random()})`,
             width: size,
             height: size
@@ -318,19 +336,35 @@ function createBg() {
 
 function createLevelTitle() {
     bgStars.get({
-        x: 400,
+        x: 300,
         y: 400,
         anchor: {x: 0.5, y: 0.5},
-        color: 'rgba(255, 255, 255, 1.0)',
         ttl: 240,
         render() {
-            this.context.fillStyle = `rgba(255, 255, 255, ${this.ttl / 240})`
+            this.context.fillStyle = `rgba(0, 125, 255, ${this.ttl / 240})`
             this.context.font = '50px Monospace'
-            this.context.fillText(`level: ${gameSetting.level}`, this.x, this.y)
+            this.context.fillText(`level ${gameSetting.level}`, this.x, this.y)
         }
-
     })
-    spriteArray.push(playerScore)
+}
+
+function lostGame() {
+    plasmaArray = []
+    asteroidArray = []
+    spriteArray = []
+    playerSprite.x = gameSetting.canvasWidth / 2
+    playerSprite.y = gameSetting.canvasHeight / 2
+    bgStars.get({
+        x: 262,
+        y: 420,
+        anchor: {x: 0.5, y: 0.5},
+        render() {
+            this.context.fillStyle = `rgba(255, 0, 0, 0.5)`
+            this.context.font = '50px Monospace'
+            this.context.fillText('GAME OVER!', this.x, this.y)
+        }
+    })
+    loop.stop()
 }
 
 function createHud() {
