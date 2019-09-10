@@ -16,15 +16,13 @@ let gameSetting = {
     level: 1,
     asteroids: 0,
     playerAcc: 0.1,
-    playerScore: 0,
     maxPlasma: 150,
     plasmaBurnRate: 10,
     plasmaRefillRate: 1,
     playerFireRate: 0.1,
     plasmaTtl: 140,
     canvasHeight: 800,
-    canvasWidth: 800,
-    highScore: getStoreItem('highScore') || 0
+    canvasWidth: 800
 }
 
 init();
@@ -52,10 +50,6 @@ let loop = GameLoop({
         playerSprite.update()
         if (!playerSprite.alive) {
             lostGame()
-            // loop.stop()
-            if (gameSetting.playerScore > gameSetting.highScore) {
-                setStoreItem('highScore', gameSetting.playerScore)
-            }
         }
         if (gameSetting.asteroids < 1) {
             gameSetting.level += 1
@@ -79,41 +73,42 @@ let loop = GameLoop({
 
 function startLevel() {
     plasmaArray = []
+    createLevelTitle()
     switch (gameSetting.level){
         case 1:
             createBg()
             createPlayer()
-            createAsteroids(5, 10000)
             createHud()
+            createAsteroids(5, 10000)
             loop.start()
             break
         case 2:
             gameSetting.plasmaBurnRate += 1
-            createAsteroids(7, 9000)
+            createAsteroids(6, 9000)
             break
         case 3:
-            gameSetting.plasmaBurnRate += 2
-            createAsteroids(9, 8000)
+            gameSetting.plasmaBurnRate += 1
+            createAsteroids(7, 8000)
             break
         case 4:
-            gameSetting.plasmaBurnRate += 3
-            createAsteroids(11, 7000)
+            gameSetting.plasmaBurnRate += 2
+            createAsteroids(8, 7000)
             break
         case 5:
-            gameSetting.plasmaBurnRate += 4
-            createAsteroids(13, 5000)
+            gameSetting.plasmaBurnRate += 2
+            createAsteroids(9, 5000)
             break
         case 6:
-            gameSetting.plasmaBurnRate += 5
-            createAsteroids(15, 4000)
+            gameSetting.plasmaBurnRate += 3
+            createAsteroids(10, 4000)
             break
         case 7:
-            gameSetting.plasmaBurnRate += 6
-            createAsteroids(17, 3000)
+            gameSetting.plasmaBurnRate += 3
+            createAsteroids(11, 3000)
             break
         case 8:
-            gameSetting.plasmaBurnRate += 7
-            createAsteroids(19, 2000)
+            gameSetting.plasmaBurnRate += 4
+            createAsteroids(12, 2000)
             break
         default:
             plasmaArray = []
@@ -129,7 +124,6 @@ function startLevel() {
             })
             loop.stop()
     }
-    createLevelTitle()
 }
 
 function createAsteroids(number, delay) {
@@ -227,7 +221,6 @@ function createPlayer() {
                 createPlasma(this.x, this.y - (this.radius * 2), (this.radius * 2))
                 this.plasma -= gameSetting.plasmaBurnRate
                 this.dt = 0
-
             }
             if (!keyPressed('space') && this.plasma < gameSetting.maxPlasma) {
                 this.plasma += gameSetting.plasmaRefillRate
@@ -267,7 +260,6 @@ function createAsteroid() {
             if ((this.x + this.radius < 0) || (this.x - this.radius > gameSetting.canvasWidth) || (this.y < -30)) {
                 this.alive = false
                 if (this.hit) {
-                    gameSetting.playerScore += 100
                     gameSetting.asteroids -= 1
                 } else {
                     setTimeout(() => createAsteroid(), Math.random() * 5000)
@@ -349,22 +341,61 @@ function createLevelTitle() {
 }
 
 function lostGame() {
+    gameSetting.asteroids = 999
     plasmaArray = []
     asteroidArray = []
     spriteArray = []
-    playerSprite.x = gameSetting.canvasWidth / 2
-    playerSprite.y = gameSetting.canvasHeight / 2
     bgStars.get({
         x: 262,
         y: 420,
         anchor: {x: 0.5, y: 0.5},
+        update() {
+            playerSprite.x = gameSetting.canvasWidth / 2
+            playerSprite.y = gameSetting.canvasHeight / 2
+            if (keyPressed('space')) {
+                gameSetting.level = 1
+                bgStars.clear()
+                loop.stop()
+                spriteArray = []
+                startLevel()
+                plasmaArray = []
+            }
+            this.advance()
+        },
         render() {
             this.context.fillStyle = `rgba(255, 0, 0, 0.5)`
             this.context.font = '50px Monospace'
             this.context.fillText('GAME OVER!', this.x, this.y)
         }
     })
-    loop.stop()
+    bgStars.get({
+        x: 262,
+        y: 520,
+        anchor: {x: 0.5, y: 0.5},
+        alpha: 1.0,
+        fading: false,
+        update() {
+            this.advance()
+            if (this.fading == true){
+                this.alpha += 0.01
+                if (this.alpha > 0.9) {
+                    this.alpha = 0.9
+                    this.fading = false
+                }
+            } else {
+                this.alpha -= 0.01
+                if (this.alpha < 0.1) {
+                    this.alpha = 0.1
+                    this.fading = true
+                }
+            }
+        },
+        render() {
+            this.context.fillStyle = `rgba(0, 0, 255, ${this.alpha})`
+            this.context.font = '16px Monospace'
+            this.context.fillText('Hit SPACE to go back to level 1!', this.x, this.y)
+        }
+    })
 }
 
 function createHud() {
@@ -397,7 +428,7 @@ function createHud() {
     })
     spriteArray.push(plasmaTxt)
 
-    let playerScore = Sprite({
+    let currentLevel = Sprite({
         x: gameSetting.canvasWidth - 450,
         y: gameSetting.canvasHeight - 10,
         color: 'white',
@@ -409,9 +440,9 @@ function createHud() {
         }
 
     })
-    spriteArray.push(playerScore)
+    spriteArray.push(currentLevel)
 
-    let highScore = Sprite({
+    let asteroidsRemaining = Sprite({
         x: gameSetting.canvasWidth - 250,
         y: gameSetting.canvasHeight - 10,
         color: 'white',
@@ -423,23 +454,13 @@ function createHud() {
         }
 
     })
-    spriteArray.push(highScore)
-}
-
-function getDirection(sprite) {
-    let direction = 0
-    if (sprite.dy < 0) direction += 1
-    if (sprite.dy > 0) direction += 2
-    if (sprite.dx < 0) direction += 4
-    if (sprite.dx > 0) direction += 8
-    return direction
+    spriteArray.push(asteroidsRemaining)
 }
 
 function collide(asteroid, plasma) {
     let dx = asteroid.x - plasma.x;
     let dy = asteroid.y - plasma.y;
     if (Math.sqrt(dx * dx + dy * dy) < asteroid.radius + plasma.radius) {
-        gameSetting.playerScore += 10
         plasma.alive = false
         if (asteroid.x > plasma.x && asteroid.dx < 0) {
             if (asteroid.dx < 0) asteroid.dx *= -1.1
